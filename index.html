@@ -3,34 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kallies Küche Pro</title>
+    <title>Kallies Gourmet-Service</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg: #fdf6ec; --text: #3d2b1f; --accent: #e8703a; --warm: #f5e6cc; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); padding-bottom: 20px; }
-        nav { background: var(--text); padding: 15px; display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 1000; }
-        .nav-tab { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
-        .nav-tab.active { background: var(--accent); font-weight: bold; }
-        .page { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
-        .page.active { display: block; }
-        .card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
-        .item { background: var(--warm); border-radius: 15px; padding: 12px 5px; text-align: center; border: 2px solid transparent; cursor: pointer; }
-        .item.selected { border-color: var(--accent); background: white; }
-        .btn { background: var(--accent); color: white; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem; }
+        :root { 
+            --bg: #f8f9fa; 
+            --card-bg: #ffffff;
+            --text-dark: #2d3436; 
+            --accent: #e8703a; 
+            --accent-soft: #fff3ed;
+            --warm-gray: #b2bec3;
+        }
         
-        .order-card { border-left: 5px solid var(--accent); background: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .order-time { font-size: 0.7rem; color: gray; display: block; }
-        .section-title { font-size: 0.9rem; font-weight: bold; text-transform: uppercase; color: #886b5e; margin: 15px 0 10px 5px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background: var(--bg); color: var(--text-dark); line-height: 1.6; }
+
+        nav { 
+            background: var(--card-bg); 
+            padding: 15px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+        }
+        .logo { font-size: 1.2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+        .nav-tabs { display: flex; gap: 8px; background: #eee; padding: 4px; border-radius: 12px; }
+        .nav-tab { 
+            border: none; 
+            background: transparent; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 0.9rem;
+            color: #636e72;
+            transition: all 0.2s;
+        }
+        .nav-tab.active { background: var(--card-bg); color: var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        .page { display: none; padding: 20px; max-width: 500px; margin: 0 auto; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { font-size: 1.4rem; margin-bottom: 20px; font-weight: 800; }
+
+        .card { background: var(--card-bg); border-radius: 24px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 20px; }
+
+        .cat-btn { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            width: 100%; 
+            padding: 18px 20px; 
+            margin-bottom: 12px; 
+            border-radius: 18px; 
+            border: none; 
+            color: white; 
+            font-size: 1.1rem; 
+            font-weight: 700; 
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .cat-btn:active { transform: scale(0.97); }
+
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+        .item { 
+            background: var(--bg); 
+            border-radius: 20px; 
+            padding: 15px 10px; 
+            text-align: center; 
+            border: 2px solid transparent; 
+            transition: all 0.2s;
+            position: relative;
+        }
+        .item.selected { border-color: var(--accent); background: var(--accent-soft); }
+        .item-emoji { font-size: 1.8rem; margin-bottom: 5px; display: block; }
+        .item-name { font-size: 0.75rem; font-weight: 700; color: var(--text-dark); }
+        
+        .qty-badge { 
+            position: absolute; top: -8px; right: -8px; 
+            background: var(--accent); color: white; 
+            width: 24px; height: 24px; border-radius: 10px; 
+            font-size: 0.75rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 8px rgba(232,112,58,0.3);
+        }
+
+        textarea { 
+            width: 100%; padding: 15px; border-radius: 15px; border: 1.5px solid #eee; 
+            background: var(--bg); font-size: 1rem; margin-top: 10px; resize: none;
+        }
+        textarea:focus { outline: none; border-color: var(--accent); }
+
+        .btn-main { 
+            background: var(--accent); color: white; border: none; padding: 18px; 
+            border-radius: 18px; width: 100%; font-weight: 800; font-size: 1rem; 
+            margin-top: 15px; cursor: pointer; box-shadow: 0 8px 20px rgba(232,112,58,0.2);
+        }
+
+        .kitchen-card { 
+            background: #ffffff; 
+            color: #000000; 
+            border-radius: 20px; 
+            padding: 18px; 
+            margin-bottom: 12px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-left: 6px solid var(--accent);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .order-text { font-weight: 700; font-size: 1.1rem; color: #000; }
+        .order-meta { font-size: 0.7rem; color: #636e72; font-weight: 600; text-transform: uppercase; }
+
+        .done-btn { 
+            background: #00b894; color: white; border: none; 
+            width: 45px; height: 45px; border-radius: 14px; 
+            font-size: 1.2rem; cursor: pointer; 
+        }
     </style>
 </head>
 <body>
 
 <nav>
-    <strong>🍳 Kallies Service</strong>
-    <div>
+    <div class="logo">KALLIES</div>
+    <div class="nav-tabs">
         <button class="nav-tab active" id="t-order" onclick="showPage('order')">Wunsch</button>
         <button class="nav-tab" id="t-admin" onclick="showPage('admin')">Küche</button>
     </div>
@@ -38,55 +138,43 @@
 
 <div id="page-order" class="page active">
     <div class="card">
-        <h2>Was möchtest du?</h2>
-        <button class="btn" style="background:#8b5e3c" onclick="startOrder('Brotzeit')">🍞 Brotzeit</button>
-        <button class="btn" style="background:#5e8b3c" onclick="startOrder('Mittagessen')">🍲 Mittagessen</button>
-        <button class="btn" style="background:#3c5e8b" onclick="startOrder('Abendessen')">🥗 Abendessen</button>
-    </div>
-    <div class="card" style="margin-top: 20px;">
-        <h3>💡 Allgemeiner Wunsch</h3>
-        <input type="text" id="direct-wish" placeholder="Z.B. 'Heute später essen'">
-        <button class="btn" style="background: #555;" onclick="sendDirectWish()">Wunsch senden</button>
+        <h2>Worauf hast du Lust?</h2>
+        <button class="cat-btn" style="background: linear-gradient(135deg, #8b5e3c, #af7a52);" onclick="startOrder('Brotzeit')">
+            <span>🍞 Brotzeit</span> ➔
+        </button>
+        <button class="cat-btn" style="background: linear-gradient(135deg, #5e8b3c, #7aa856);" onclick="startOrder('Mittagessen')">
+            <span>🍲 Mittagessen</span> ➔
+        </button>
+        <button class="cat-btn" style="background: linear-gradient(135deg, #3c5e8b, #567aa8);" onclick="startOrder('Abendessen')">
+            <span>🥗 Abendessen</span> ➔
+        </button>
+        <button class="cat-btn" style="background: linear-gradient(135deg, #e67e22, #f39c12);" onclick="startOrder('Obst & Snacks')">
+            <span>🍎 Obst & Snacks</span> ➔
+        </button>
     </div>
 </div>
 
 <div id="page-select" class="page">
     <div class="card">
-        <h2 id="select-title">Auswahl</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 id="select-title" style="margin-bottom:0">Auswahl</h2>
+            <span id="selected-count" style="font-size:0.8rem; font-weight:bold; color:var(--accent)"></span>
+        </div>
         <div id="item-grid" class="grid"></div>
-        <textarea id="extra-wish" placeholder="Besondere Wünsche?"></textarea>
-        <button class="btn" onclick="sendFinalOrder()">Bestellung abschicken ✨</button>
-        <button class="btn" style="background:#eee; color:#555" onclick="showPage('order')">Abbrechen</button>
+        <textarea id="extra-wish" rows="3" placeholder="Besondere Wünsche oder Anmerkungen?"></textarea>
+        <button class="btn-main" onclick="sendFinalOrder()">Bestellung abschicken ✨</button>
+        <button style="background:none; border:none; color:var(--warm-gray); width:100%; margin-top:15px; font-weight:700; cursor:pointer;" onclick="showPage('order')">Abbrechen</button>
     </div>
 </div>
 
 <div id="page-admin" class="page">
-    <div class="card" style="background: #3d2b1f; color: white;">
-        <h2>🛎️ Neue Eingänge</h2>
-        
-        <div class="section-title" style="color: #e8703a;">Bestellungen</div>
-        <div id="kitchen-orders">Lade...</div>
-
-        <div class="section-title" style="color: #e8703a;">Wünsche</div>
-        <div id="kitchen-wishes">Lade...</div>
+    <h2 style="padding-left: 10px;">🛎️ Bestellungen</h2>
+    <div id="kitchen-orders">Suche...</div>
+    
+    <div class="card" style="margin-top: 40px; opacity: 0.6;">
+        <h3 style="font-size: 0.9rem; margin-bottom: 10px;">Lager-Status</h3>
+        <div id="admin-inventory-list"></div>
     </div>
-
-    <div class="card">
-        <h3>📦 Vorrat verwalten</h3>
-        <input type="text" id="add-emoji" placeholder="Emoji">
-        <input type="text" id="add-name" placeholder="Name">
-        <div style="display:flex; gap:5px">
-            <input type="number" id="add-qty-num" placeholder="Menge" style="width:40%">
-            <select id="add-qty-unit" style="width:60%">
-                <option value="Stk">Stück</option>
-                <option value="Scheiben">Scheiben</option>
-                <option value="g">Gramm</option>
-                <option value="Pkg">Packung</option>
-            </select>
-        </div>
-        <button class="btn" onclick="saveToDb()">Hinzufügen</button>
-    </div>
-    <div id="admin-inventory-list"></div>
 </div>
 
 <script>
@@ -95,99 +183,102 @@
     const db = window.supabase.createClient(S_URL, S_KEY);
 
     let currentCat = "";
-    let chosen = [];
+    let chosen = {}; 
+    let lastOrderCount = 0;
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('page-' + id).classList.add('active');
-        if(document.getElementById('t-' + id)) document.getElementById('t-' + id).classList.add('active');
-        
-        if(id === 'admin') { loadKitchenData(); }
+        document.getElementById('t-' + id).classList.add('active');
+        if(id === 'admin') loadKitchenData();
     }
 
-    // --- BESTELLUNG ---
     async function startOrder(cat) {
-        currentCat = cat; chosen = [];
+        currentCat = cat; chosen = {};
         document.getElementById('select-title').innerText = cat;
+        document.getElementById('selected-count').innerText = "";
         showPage('select');
         const { data } = await db.from('inventory').select('*').order('name');
-        document.getElementById('item-grid').innerHTML = data.map(i => `
-            <div class="item" id="i-${i.id}" onclick="toggle('${i.name}', ${i.id})">
-                <div style="font-size:1.5rem">${i.emoji || '📦'}</div>
-                <div style="font-size:0.75rem; font-weight:bold">${i.name}</div>
-                <div style="font-size:0.6rem; color:gray">${i.qty || ''}</div>
+        
+        document.getElementById('item-grid').innerHTML = data.map(i => {
+            const unit = i.qty ? i.qty.split(' ')[1] || 'Stk' : 'Stk';
+            return `
+            <div class="item" id="i-${i.id}" onclick="selectWithQty('${i.name}', ${i.id}, '${unit}')">
+                <span class="item-emoji">${i.emoji || '📦'}</span>
+                <span class="item-name">${i.name}</span>
+                <div id="badge-${i.id}"></div>
             </div>
-        `).join('') || "Lager ist leer.";
+            `;
+        }).join('');
     }
 
-    function toggle(name, id) {
-        const el = document.getElementById('i-' + id);
-        if(chosen.includes(name)) { chosen = chosen.filter(n => n !== name); el.classList.remove('selected'); }
-        else { chosen.push(name); el.classList.add('selected'); }
+    function selectWithQty(name, id, unit) {
+        let amount = prompt(`Wieviel ${unit} ${name}?`, "1");
+        if (amount !== null && amount > 0) {
+            chosen[name] = amount + " " + unit;
+            document.getElementById(`i-${id}`).classList.add('selected');
+            document.getElementById(`badge-${id}`).innerHTML = `<div class="qty-badge">${amount}</div>`;
+        } else if (amount === "0") {
+            delete chosen[name];
+            document.getElementById(`i-${id}`).classList.remove('selected');
+            document.getElementById(`badge-${id}`).innerHTML = "";
+        }
+        
+        const count = Object.keys(chosen).length;
+        document.getElementById('selected-count').innerText = count > 0 ? `${count} ausgewählt` : "";
     }
 
     async function sendFinalOrder() {
+        const itemsArray = Object.keys(chosen).map(key => `${chosen[key]} ${key}`);
+        if (itemsArray.length === 0) return;
+
         const extra = document.getElementById('extra-wish').value;
-        const text = `${currentCat}: ${chosen.join(', ')} ${extra ? ' | '+extra : ''}`;
+        const text = `${currentCat}: ${itemsArray.join(', ')}${extra ? ' | ' + extra : ''}`;
+        
         const { error } = await db.from('orders').insert([{ note: text, status: 'pending' }]);
-        if(!error) { alert("Bestellung abgeschickt!"); document.getElementById('extra-wish').value = ""; showPage('order'); }
+        
+        if(!error) {
+            alert("Abgeschickt! ✨"); 
+            showPage('order');
+        } else {
+            alert("Fehler: " + error.message);
+        }
     }
 
-    async function sendDirectWish() {
-        const wishText = document.getElementById('direct-wish').value;
-        if(!wishText) return;
-        const { error } = await db.from('wishes').insert([{ text: wishText }]);
-        if(!error) { alert("Wunsch gesendet!"); document.getElementById('direct-wish').value = ""; }
-    }
-
-    // --- KÜCHE ---
     async function loadKitchenData() {
-        // 1. Bestellungen (note Spalte)
         const { data: orders } = await db.from('orders').select('*').order('created_at', { ascending: false });
+        
+        if (orders && orders.length > lastOrderCount && lastOrderCount !== 0) {
+            audio.play().catch(() => {});
+        }
+        lastOrderCount = orders ? orders.length : 0;
+
         document.getElementById('kitchen-orders').innerHTML = orders.map(o => `
-            <div class="order-card">
+            <div class="kitchen-card">
                 <div>
-                    <span class="order-time">${new Date(o.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} Uhr</span>
-                    <b>${o.note || 'Bestellung'}</b>
+                    <div class="order-meta">${new Date(o.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} Uhr</div>
+                    <div class="order-text">${o.note}</div>
                 </div>
-                <button onclick="deleteRow('orders', ${o.id})" style="border:none; background:none; font-size:1.5rem">✅</button>
+                <button class="done-btn" onclick="deleteRow(${o.id})">✓</button>
             </div>
-        `).join('') || "<small>Keine Bestellungen.</small>";
+        `).join('') || "<div style='text-align:center; color:gray; padding:20px; font-weight:600;'>Aktuell keine Bestellungen</div>";
 
-        // 2. Wünsche (text Spalte)
-        const { data: wishes } = await db.from('wishes').select('*').order('id', { ascending: false });
-        document.getElementById('kitchen-wishes').innerHTML = wishes.map(w => `
-            <div class="order-card" style="border-left-color: #555;">
-                <div><b>${w.text}</b></div>
-                <button onclick="deleteRow('wishes', ${w.id})" style="border:none; background:none; font-size:1.5rem">🗑️</button>
-            </div>
-        `).join('') || "<small>Keine Wünsche.</small>";
-
-        // 3. Inventar
         const { data: inv } = await db.from('inventory').select('*').order('name');
         document.getElementById('admin-inventory-list').innerHTML = inv.map(i => `
-            <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:10px;">
-                <span>${i.emoji} <b>${i.name}</b> (${i.qty})</span>
-                <button onclick="deleteRow('inventory', ${i.id})" style="color:red; border:none; background:none;">✕</button>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px; padding: 4px 0; border-bottom: 1px solid #f0f0f0;">
+                <span>${i.emoji} ${i.name}</span>
+                <b style="color:var(--accent)">${i.qty}</b>
             </div>
         `).join('');
     }
 
-    async function deleteRow(table, id) {
-        await db.from(table).delete().eq('id', id);
+    async function deleteRow(id) {
+        await db.from('orders').delete().eq('id', id);
         loadKitchenData();
     }
 
-    async function saveToDb() {
-        const name = document.getElementById('add-name').value;
-        const qty = document.getElementById('add-qty-num').value + " " + document.getElementById('add-qty-unit').value;
-        await db.from('inventory').insert([{ name, emoji: document.getElementById('add-emoji').value, qty }]);
-        document.getElementById('add-name').value = "";
-        loadKitchenData();
-    }
-
-    // Auto-Update
     setInterval(() => { if(document.getElementById('page-admin').classList.contains('active')) loadKitchenData(); }, 20000);
 </script>
 </body>
