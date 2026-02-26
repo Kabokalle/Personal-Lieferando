@@ -12,20 +12,16 @@
         nav { background: var(--text); padding: 15px; display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 1000; }
         .nav-tab { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
         .nav-tab.active { background: var(--accent); font-weight: bold; }
-        
         .page { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
         .page.active { display: block; }
         .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        
-        /* Grid & Items */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
         .item { background: var(--warm); border-radius: 15px; padding: 12px 5px; text-align: center; border: 2px solid transparent; cursor: pointer; }
         .item.selected { border-color: var(--accent); background: white; box-shadow: 0 0 10px rgba(232,112,58,0.2); }
-        .qty-info { font-size: 0.6rem; display: block; color: #886b5e; font-weight: bold; margin-top: 4px; }
-
+        .qty-info { font-size: 0.65rem; display: block; color: #886b5e; font-weight: bold; margin-top: 4px; }
         .btn { background: var(--accent); color: white; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-        .btn-sec { background: #eee; color: #555; padding: 10px; font-size: 0.8rem; }
-        input { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #ddd; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem; background: white; }
+        .admin-flex { display: flex; gap: 5px; }
     </style>
 </head>
 <body>
@@ -50,10 +46,10 @@
 <div id="page-select" class="page">
     <div class="card">
         <h2 id="select-title">Was soll drauf?</h2>
-        <div id="item-grid" class="grid"></div>
-        <textarea id="extra-wish" placeholder="Besondere Wünsche? (z.B. viel Butter)" style="width:100%; height:80px; padding:10px; border-radius:10px; border:1px solid #ddd;"></textarea>
+        <div id="item-grid" class="grid">Lade...</div>
+        <textarea id="extra-wish" placeholder="Besondere Wünsche? (z.B. viel Butter)"></textarea>
         <button class="btn" onclick="sendFinalOrder()">Bestellung abschicken ✨</button>
-        <button class="btn btn-sec" onclick="showPage('order')">Zurück</button>
+        <button class="btn" style="background:#eee; color:#555" onclick="showPage('order')">Zurück</button>
     </div>
 </div>
 
@@ -62,15 +58,25 @@
         <h3>Neuer Vorrat</h3>
         <input type="text" id="add-emoji" placeholder="Emoji (z.B. 🧀)">
         <input type="text" id="add-name" placeholder="Name (z.B. Käse)">
-        <input type="text" id="add-qty" placeholder="Menge (z.B. 10 Scheiben / 1 Packung)">
-        <button class="btn" onclick="saveToDb()">Hinzufügen</button>
+        <div class="admin-flex">
+            <input type="number" id="add-qty-num" placeholder="Menge" style="width: 40%">
+            <select id="add-qty-unit" style="width: 60%">
+                <option value="Stk">Stück (Stk)</option>
+                <option value="Scheiben">Scheiben</option>
+                <option value="g">Gramm (g)</option>
+                <option value="kg">Kilogramm (kg)</option>
+                <option value="Pkg">Packung (Pkg)</option>
+                <option value="ml">Milliliter (ml)</option>
+            </select>
+        </div>
+        <button class="btn" onclick="saveToDb()">Ins Lager legen</button>
     </div>
     <div id="admin-list"></div>
 </div>
 
 <script>
     const S_URL = "https://tdlswqmltbzvjdavnuyz.supabase.co";
-    const S_KEY = "sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HAeo3"; // <--- HIER DEINEN LANGEN KEY REIN!
+    const S_KEY = "sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HAeo3"; // <--- Hier DEINEN LANGEN KEY einfügen!
     const db = window.supabase.createClient(S_URL, S_KEY);
 
     let currentCat = "";
@@ -93,10 +99,10 @@
         document.getElementById('item-grid').innerHTML = data.map(i => `
             <div class="item" id="i-${i.id}" onclick="toggle('${i.name}', ${i.id})">
                 <div style="font-size:1.5rem">${i.emoji || '📦'}</div>
-                <div style="font-size:0.7rem; font-weight:bold">${i.name}</div>
+                <div style="font-size:0.75rem; font-weight:bold">${i.name}</div>
                 <span class="qty-info">${i.qty || ''}</span>
             </div>
-        `).join('');
+        `).join('') || "Lager ist leer.";
     }
 
     function toggle(name, id) {
@@ -111,22 +117,27 @@
     }
 
     async function sendFinalOrder() {
+        if(chosen.length === 0 && currentCat === 'Brotzeit') return alert("Wähle bitte etwas aus!");
         const extra = document.getElementById('extra-wish').value;
-        const bestellung = `${currentCat}: ${chosen.join(', ')} ${extra ? ' (Extra: '+extra+')' : ''}`;
+        const bestellung = `${currentCat}: ${chosen.join(', ')} ${extra ? ' | Extra: '+extra : ''}`;
         
         const { error } = await db.from('orders').insert([{ text: bestellung }]);
         if(!error) {
-            alert("Bestellt! " + bestellung);
+            alert("Erfolg! Bestellung abgeschickt.");
+            document.getElementById('extra-wish').value = "";
             showPage('order');
-        } else { alert("Fehler beim Senden!"); }
+        } else { 
+            console.error(error);
+            alert("Fehler: " + error.message + ". Prüfe RLS für 'orders'!"); 
+        }
     }
 
     async function loadAdmin() {
         const { data } = await db.from('inventory').select('*').order('name');
         document.getElementById('admin-list').innerHTML = data.map(i => `
-            <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:10px;">
-                <span>${i.emoji} <b>${i.name}</b> (${i.qty})</span>
-                <button onclick="del(${i.id})" style="color:red; border:none; background:none;">✕</button>
+            <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:10px">
+                <span>${i.emoji} <b>${i.name}</b> <br><small>${i.qty || '0'}</small></span>
+                <button onclick="del(${i.id})" style="color:red; border:none; background:none; font-size:1.2rem">✕</button>
             </div>
         `).join('');
     }
@@ -134,166 +145,26 @@
     async function saveToDb() {
         const name = document.getElementById('add-name').value;
         const emoji = document.getElementById('add-emoji').value || '🍴';
-        const qty = document.getElementById('add-qty').value || '1 Stk';
-        await db.from('inventory').insert([{ name, emoji, qty }]);
+        const num = document.getElementById('add-qty-num').value || '1';
+        const unit = document.getElementById('add-qty-unit').value;
+        const fullQty = num + " " + unit;
+
+        if(!name) return alert("Name fehlt!");
+
+        const { error } = await db.from('inventory').insert([{ name, emoji, qty: fullQty }]);
+        if(error) alert("Fehler beim Speichern: " + error.message);
+        
         document.getElementById('add-name').value = "";
-        document.getElementById('add-qty').value = "";
+        document.getElementById('add-qty-num').value = "";
         loadAdmin();
     }
 
-    async function del(id) { await db.from('inventory').delete().eq('id', id); loadAdmin(); }
-
-</script>
-</body>
-</html><!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kallies Küche</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #fdf6ec; --text: #3d2b1f; --accent: #e8703a; 
-            --white: #ffffff; --warm: #f5e6cc; --shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 40px; }
-        
-        /* Navigation */
-        nav { background: var(--text); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .logo { color: white; font-family: 'Playfair Display', serif; font-size: 1.2rem; }
-        .nav-tabs { display: flex; gap: 8px; }
-        .nav-tab { background: rgba(255,255,255,0.1); border: none; color: white; padding: 10px 16px; border-radius: 12px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: 0.3s; }
-        .nav-tab.active { background: var(--accent); color: white; font-weight: 700; }
-
-        /* Layout */
-        .page { display: none; padding: 20px; max-width: 500px; margin: 0 auto; animation: fadeIn 0.3s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        h2 { font-family: 'Playfair Display', serif; margin-bottom: 15px; font-size: 1.4rem; }
-        .card { background: var(--white); border-radius: 20px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.02); }
-
-        /* Inventar Grid */
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .item { background: var(--warm); border-radius: 16px; padding: 15px 10px; text-align: center; transition: 0.2s; border: 2px solid transparent; }
-        .item:active { transform: scale(0.95); background: white; border-color: var(--accent); }
-        .item-emoji { font-size: 1.8rem; display: block; margin-bottom: 5px; }
-        .item-name { font-size: 0.8rem; font-weight: 700; color: var(--text); }
-
-        /* Admin & Forms */
-        .input-group { display: flex; flex-direction: column; gap: 10px; }
-        input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #eee; background: #f9f9f9; font-size: 1rem; outline: none; }
-        input:focus { border-color: var(--accent); background: white; }
-        .btn { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 12px; width: 100%; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 10px rgba(232, 112, 58, 0.3); }
-        
-        .admin-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
-        .btn-del { background: none; border: none; color: #ff4d4d; font-size: 1.2rem; cursor: pointer; padding: 5px; }
-    </style>
-</head>
-<body>
-
-<nav>
-    <div class="logo">🍳 Kallies Küche</div>
-    <div class="nav-tabs">
-        <button id="btn-order" class="nav-tab active" onclick="showPage('order')">Wunsch</button>
-        <button id="btn-admin" class="nav-tab" onclick="showPage('admin')">Küche</button>
-    </div>
-</nav>
-
-<div id="page-order" class="page active">
-    <div class="card">
-        <h2>🧊 Kühlschrank</h2>
-        <div id="user-grid" class="grid">Lade...</div>
-    </div>
-</div>
-
-<div id="page-admin" class="page">
-    <div class="card">
-        <h2>➕ Neu hinzufügen</h2>
-        <div class="input-group">
-            <input type="text" id="in-emoji" placeholder="Emoji (z.B. 🍎)">
-            <input type="text" id="in-name" placeholder="Name (z.B. Äpfel)">
-            <button class="btn" onclick="saveToDb()">Speichern</button>
-        </div>
-    </div>
-    <div class="card">
-        <h2>📦 Lagerbestand</h2>
-        <div id="admin-list"></div>
-    </div>
-</div>
-
-<script>
-    // DEINE DATEN
-    const S_URL = "https://tdlswqmltbzvjdavnuyz.supabase.co";
-    const S_KEY = "sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HAeo3"; // Stelle sicher, dass hier dein LANGER Key steht!
-
-    let db;
-    try {
-        db = window.supabase.createClient(S_URL, S_KEY);
-    } catch(e) {
-        console.error("Supabase Error:", e);
-    }
-
-    function showPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById('page-' + pageId).classList.add('active');
-        document.getElementById('btn-' + pageId).classList.add('active');
-        loadFromDb();
-    }
-
-    async function loadFromDb() {
-        try {
-            const { data, error } = await db.from('inventory').select('*').order('name');
-            if(error) throw error;
-            
-            // Anzeige User Grid
-            document.getElementById('user-grid').innerHTML = data.map(i => `
-                <div class="item">
-                    <span class="item-emoji">${i.emoji || '📦'}</span>
-                    <span class="item-name">${i.name}</span>
-                </div>
-            `).join('') || "<p>Der Kühlschrank ist leer.</p>";
-
-            // Anzeige Admin Liste
-            document.getElementById('admin-list').innerHTML = data.map(i => `
-                <div class="admin-row">
-                    <span>${i.emoji || '📦'} ${i.name}</span>
-                    <button class="btn-del" onclick="deleteFromDb(${i.id})">✕</button>
-                </div>
-            `).join('') || "<p>Keine Einträge.</p>";
-
-        } catch(e) {
-            console.log("Fehler beim Laden:", e.message);
-        }
-    }
-
-    async function saveToDb() {
-        const nameVal = document.getElementById('in-name').value;
-        const emojiVal = document.getElementById('in-emoji').value || '📦';
-        
-        if(!nameVal) return;
-
-        const { error } = await db.from('inventory').insert([{ name: nameVal, emoji: emojiVal }]);
-        if(error) alert("Fehler: " + error.message);
-        
-        document.getElementById('in-name').value = "";
-        document.getElementById('in-emoji').value = "";
-        loadFromDb();
-    }
-
-    async function deleteFromDb(id) {
+    async function del(id) { 
         if(confirm("Löschen?")) {
-            await db.from('inventory').delete().eq('id', id);
-            loadFromDb();
+            await db.from('inventory').delete().eq('id', id); 
+            loadAdmin(); 
         }
     }
-
-    // Erster Aufruf
-    loadFromDb();
 </script>
 </body>
 </html>
