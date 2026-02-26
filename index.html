@@ -6,30 +6,30 @@
 <title>Kallies Gourmet-Service</title>
 
 <!-- PWA -->
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#e8703a">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
---bg:#f8f9fa;--card:#fff;--text:#2d3436;
---accent:#e8703a;--soft:#fff3ed;--gray:#b2bec3
+  --bg:#f8f9fa;--card:#fff;--text:#2d3436;
+  --accent:#e8703a;--soft:#fff3ed;--gray:#b2bec3
 }
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
 body{background:var(--bg);color:var(--text)}
 
 nav{
-background:#fff;padding:15px 20px;display:flex;
-justify-content:space-between;align-items:center;
-box-shadow:0 2px 10px rgba(0,0,0,.05);
-position:sticky;top:0;z-index:9
+  background:#fff;padding:15px 20px;display:flex;
+  justify-content:space-between;align-items:center;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+  position:sticky;top:0;z-index:9
 }
 .logo{font-weight:900;color:var(--accent)}
 .nav-tabs{display:flex;background:#eee;padding:4px;border-radius:12px}
 .nav-tab{
-border:none;background:none;padding:8px 16px;
-font-weight:700;color:#666;border-radius:8px
+  border:none;background:none;padding:8px 16px;
+  font-weight:700;color:#666;border-radius:8px
 }
 .nav-tab.active{background:#fff;color:var(--accent)}
 
@@ -37,50 +37,50 @@ font-weight:700;color:#666;border-radius:8px
 .page.active{display:block}
 
 .card{
-background:#fff;border-radius:24px;padding:24px;
-margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,.04)
+  background:#fff;border-radius:24px;padding:24px;
+  margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,.04)
 }
 
 .cat-btn{
-width:100%;border:none;border-radius:18px;
-padding:18px 20px;margin-bottom:12px;
-color:#fff;font-size:1.1rem;font-weight:800
+  width:100%;border:none;border-radius:18px;
+  padding:18px 20px;margin-bottom:12px;
+  color:#fff;font-size:1.1rem;font-weight:800;cursor:pointer
 }
 
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .item{
-background:#f1f2f3;border-radius:20px;
-padding:12px;text-align:center
+  background:#f1f2f3;border-radius:20px;
+  padding:12px;text-align:center;cursor:pointer
 }
 .item.selected{background:var(--soft);border:2px solid var(--accent)}
 
 .qty{
-display:flex;justify-content:center;gap:10px;margin-top:8px
+  display:flex;justify-content:center;gap:10px;margin-top:8px
 }
 .qty button{
-border:none;background:var(--accent);color:#fff;
-width:28px;height:28px;border-radius:10px;font-weight:900
+  border:none;background:var(--accent);color:#fff;
+  width:28px;height:28px;border-radius:10px;font-weight:900;cursor:pointer
 }
 
 textarea{
-width:100%;border-radius:14px;padding:12px;
-border:1px solid #ddd;margin-top:10px
+  width:100%;border-radius:14px;padding:12px;
+  border:1px solid #ddd;margin-top:10px
 }
 
 .btn-main{
-width:100%;border:none;background:var(--accent);
-color:#fff;padding:16px;border-radius:18px;
-font-weight:900;margin-top:14px
+  width:100%;border:none;background:var(--accent);
+  color:#fff;padding:16px;border-radius:18px;
+  font-weight:900;margin-top:14px;cursor:pointer
 }
 
 .kitchen-card{
-background:#fff;border-radius:18px;padding:16px;
-display:flex;justify-content:space-between;align-items:center;
-border-left:6px solid var(--accent);margin-bottom:12px
+  background:#fff;border-radius:18px;padding:16px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-left:6px solid var(--accent);margin-bottom:12px
 }
 .done-btn{
-border:none;background:#00b894;color:#fff;
-width:44px;height:44px;border-radius:14px;font-size:1.2rem
+  border:none;background:#00b894;color:#fff;
+  width:44px;height:44px;border-radius:14px;font-size:1.2rem;cursor:pointer
 }
 </style>
 </head>
@@ -134,85 +134,73 @@ let category="", cart={};
 const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
 let lastCount = 0;
 
+// --- GLOBAL FUNCTIONS ---
 function showPage(p){
-document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
-document.querySelectorAll(".nav-tab").forEach(x=>x.classList.remove("active"));
-document.getElementById("page-"+p).classList.add("active");
-document.getElementById("t-"+p).classList.add("active");
-if(p==="admin") loadKitchen();
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(x=>x.classList.remove("active"));
+  document.getElementById("page-"+p).classList.add("active");
+  document.getElementById("t-"+p).classList.add("active");
+  if(p==="admin") loadKitchen();
 }
 
 async function startOrder(cat){
-category=cat; cart={};
-showPage("select");
-select-title.innerText = cat;
+  category = cat;
+  cart = {};
+  showPage("select");
+  document.getElementById("select-title").innerText = cat;
 
-const {data,error} = await db.from("inventory").select("*").order("name");
-if(!data) return alert("Fehler beim Laden");
+  const {data,error} = await db.from("inventory").select("*").order("name");
+  if(!data) return alert("Fehler beim Laden");
 
-item-grid.innerHTML = data.map(i=>`
-<div class="item" id="i${i.id}">
-<div>${i.emoji||"📦"}<br><b>${i.name}</b></div>
-<div class="qty">
-<button onclick="chg(${i.id},'${i.name}',-1)">–</button>
-<button onclick="chg(${i.id},'${i.name}',1)">+</button>
-</div>
-</div>`).join("");
+  document.getElementById("item-grid").innerHTML = data.map(i=>`
+    <div class="item" id="i${i.id}" onclick="chg(${i.id},'${i.name}',1)">
+      <div>${i.emoji||'📦'}<br><b>${i.name}</b></div>
+      <div class="qty">
+        <button onclick="chg(${i.id},'${i.name}',-1)">–</button>
+        <button onclick="chg(${i.id},'${i.name}',1)">+</button>
+      </div>
+    </div>`).join("");
 }
 
 function chg(id,name,delta){
-cart[name]=(cart[name]||0)+delta;
-if(cart[name]<=0) delete cart[name];
-document.getElementById("i"+id)
-.classList.toggle("selected",cart[name]>0);
+  cart[name]=(cart[name]||0)+delta;
+  if(cart[name]<=0) delete cart[name];
+  document.getElementById("i"+id).classList.toggle("selected",cart[name]>0);
 }
 
 async function sendOrder(){
-if(!Object.keys(cart).length) return;
-
-const note = `${category}: ` +
-Object.entries(cart).map(([k,v])=>`${v}× ${k}`).join(", ") +
-(extra-wish.value ? " | "+extra-wish.value : "");
-
-await db.from("orders").insert([{ note, status:"pending" }]);
-alert("Abgeschickt ✨");
-showPage("order");
+  if(!Object.keys(cart).length) return;
+  const note = category + ": " + Object.entries(cart).map(([k,v])=>`${v}× ${k}`).join(", ")
+             + (document.getElementById("extra-wish").value ? " | " + document.getElementById("extra-wish").value : "");
+  await db.from("orders").insert([{note,status:"pending"}]);
+  alert("Abgeschickt ✨");
+  showPage("order");
 }
 
 async function loadKitchen(){
-const {data} = await db.from("orders")
-.select("*").eq("status","pending")
-.order("created_at",{ascending:false});
+  const {data} = await db.from("orders").select("*").eq("status","pending").order("created_at",{ascending:false});
+  if(data && data.length>lastCount && lastCount!==0) audio.play().catch(()=>{});
+  lastCount = data?.length || 0;
 
-if(data && data.length>lastCount && lastCount!==0){
-audio.play().catch(()=>{});
-}
-lastCount = data?.length || 0;
-
-kitchen-orders.innerHTML = data?.map(o=>`
-<div class="kitchen-card">
-<div>
-<b>${new Date(o.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</b><br>
-${o.note}
-</div>
-<button class="done-btn" onclick="done(${o.id})">✓</button>
-</div>`).join("") || "Keine Bestellungen";
+  document.getElementById("kitchen-orders").innerHTML = data?.map(o=>`
+    <div class="kitchen-card">
+      <div><b>${new Date(o.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</b><br>${o.note}</div>
+      <button class="done-btn" onclick="done(${o.id})">✓</button>
+    </div>`).join("") || "Keine Bestellungen";
 }
 
 async function done(id){
-await db.from("orders").update({status:"done"}).eq("id",id);
-loadKitchen();
+  await db.from("orders").update({status:"done"}).eq("id",id);
+  loadKitchen();
 }
 
-setInterval(()=>{
-if(document.getElementById("page-admin").classList.contains("active")){
-loadKitchen();
-}
-},20000);
+setInterval(()=>{if(document.getElementById("page-admin").classList.contains("active")) loadKitchen();},20000);
 
-// Service Worker
+// --- SERVICE WORKER ---
 if("serviceWorker" in navigator){
-navigator.serviceWorker.register("/service-worker.js");
+  navigator.serviceWorker.register("service-worker.js")
+    .then(()=>console.log("SW registered"))
+    .catch(err=>console.log("SW failed",err));
 }
 </script>
 
