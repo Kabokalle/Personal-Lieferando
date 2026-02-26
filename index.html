@@ -76,7 +76,7 @@
 
 <script>
     const S_URL = "https://tdlswqmltbzvjdavnuyz.supabase.co";
-    const S_KEY = "sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HAeo3"; // <--- Hier DEINEN LANGEN KEY einfügen!
+    const S_KEY = "sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HA7G8Lia3RzY66q16uN3j4z7s7p6v5r4";
     const db = window.supabase.createClient(S_URL, S_KEY);
 
     let currentCat = "";
@@ -119,16 +119,22 @@
     async function sendFinalOrder() {
         if(chosen.length === 0 && currentCat === 'Brotzeit') return alert("Wähle bitte etwas aus!");
         const extra = document.getElementById('extra-wish').value;
-        const bestellung = `${currentCat}: ${chosen.join(', ')} ${extra ? ' | Extra: '+extra : ''}`;
         
-        const { error } = await db.from('orders').insert([{ text: bestellung }]);
+        // Wir passen die Daten an DEINE Tabellenstruktur an (note statt text)
+        const bestellText = `${currentCat}: ${chosen.join(', ')} ${extra ? ' | Extra: '+extra : ''}`;
+        
+        const { error } = await db.from('orders').insert([{ 
+            note: bestellText, 
+            status: 'pending' 
+        }]);
+
         if(!error) {
             alert("Erfolg! Bestellung abgeschickt.");
             document.getElementById('extra-wish').value = "";
             showPage('order');
         } else { 
             console.error(error);
-            alert("Fehler: " + error.message + ". Prüfe RLS für 'orders'!"); 
+            alert("Fehler: " + error.message); 
         }
     }
 
