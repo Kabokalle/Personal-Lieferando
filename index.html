@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kallies Liefer-Service</title>
+    <title>Kallies Küche Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg: #fdf6ec; --text: #3d2b1f; --accent: #e8703a; --warm: #f5e6cc; }
@@ -14,14 +14,16 @@
         .nav-tab.active { background: var(--accent); font-weight: bold; }
         .page { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
         .page.active { display: block; }
-        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
         .item { background: var(--warm); border-radius: 15px; padding: 12px 5px; text-align: center; border: 2px solid transparent; cursor: pointer; }
-        .item.selected { border-color: var(--accent); background: white; box-shadow: 0 0 10px rgba(232,112,58,0.2); }
-        .qty-info { font-size: 0.65rem; display: block; color: #886b5e; font-weight: bold; margin-top: 4px; }
-        .btn { background: var(--accent); color: white; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem; background: white; }
-        .admin-flex { display: flex; gap: 5px; }
+        .item.selected { border-color: var(--accent); background: white; }
+        .btn { background: var(--accent); color: white; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem; }
+        
+        .order-card { border-left: 5px solid var(--accent); background: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .order-time { font-size: 0.7rem; color: gray; display: block; }
+        .section-title { font-size: 0.9rem; font-weight: bold; text-transform: uppercase; color: #886b5e; margin: 15px 0 10px 5px; }
     </style>
 </head>
 <body>
@@ -41,42 +43,55 @@
         <button class="btn" style="background:#5e8b3c" onclick="startOrder('Mittagessen')">🍲 Mittagessen</button>
         <button class="btn" style="background:#3c5e8b" onclick="startOrder('Abendessen')">🥗 Abendessen</button>
     </div>
+    <div class="card" style="margin-top: 20px;">
+        <h3>💡 Allgemeiner Wunsch</h3>
+        <input type="text" id="direct-wish" placeholder="Z.B. 'Heute später essen'">
+        <button class="btn" style="background: #555;" onclick="sendDirectWish()">Wunsch senden</button>
+    </div>
 </div>
 
 <div id="page-select" class="page">
     <div class="card">
-        <h2 id="select-title">Was soll drauf?</h2>
-        <div id="item-grid" class="grid">Lade...</div>
-        <textarea id="extra-wish" placeholder="Besondere Wünsche? (z.B. viel Butter)"></textarea>
+        <h2 id="select-title">Auswahl</h2>
+        <div id="item-grid" class="grid"></div>
+        <textarea id="extra-wish" placeholder="Besondere Wünsche?"></textarea>
         <button class="btn" onclick="sendFinalOrder()">Bestellung abschicken ✨</button>
-        <button class="btn" style="background:#eee; color:#555" onclick="showPage('order')">Zurück</button>
+        <button class="btn" style="background:#eee; color:#555" onclick="showPage('order')">Abbrechen</button>
     </div>
 </div>
 
 <div id="page-admin" class="page">
+    <div class="card" style="background: #3d2b1f; color: white;">
+        <h2>🛎️ Neue Eingänge</h2>
+        
+        <div class="section-title" style="color: #e8703a;">Bestellungen</div>
+        <div id="kitchen-orders">Lade...</div>
+
+        <div class="section-title" style="color: #e8703a;">Wünsche</div>
+        <div id="kitchen-wishes">Lade...</div>
+    </div>
+
     <div class="card">
-        <h3>Neuer Vorrat</h3>
-        <input type="text" id="add-emoji" placeholder="Emoji (z.B. 🧀)">
-        <input type="text" id="add-name" placeholder="Name (z.B. Käse)">
-        <div class="admin-flex">
-            <input type="number" id="add-qty-num" placeholder="Menge" style="width: 40%">
-            <select id="add-qty-unit" style="width: 60%">
-                <option value="Stk">Stück (Stk)</option>
+        <h3>📦 Vorrat verwalten</h3>
+        <input type="text" id="add-emoji" placeholder="Emoji">
+        <input type="text" id="add-name" placeholder="Name">
+        <div style="display:flex; gap:5px">
+            <input type="number" id="add-qty-num" placeholder="Menge" style="width:40%">
+            <select id="add-qty-unit" style="width:60%">
+                <option value="Stk">Stück</option>
                 <option value="Scheiben">Scheiben</option>
-                <option value="g">Gramm (g)</option>
-                <option value="kg">Kilogramm (kg)</option>
-                <option value="Pkg">Packung (Pkg)</option>
-                <option value="ml">Milliliter (ml)</option>
+                <option value="g">Gramm</option>
+                <option value="Pkg">Packung</option>
             </select>
         </div>
-        <button class="btn" onclick="saveToDb()">Ins Lager legen</button>
+        <button class="btn" onclick="saveToDb()">Hinzufügen</button>
     </div>
-    <div id="admin-list"></div>
+    <div id="admin-inventory-list"></div>
 </div>
 
 <script>
     const S_URL = "https://tdlswqmltbzvjdavnuyz.supabase.co";
-    const S_KEY = "sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HAeo3";
+    const S_KEY = "sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HAeo3"; 
     const db = window.supabase.createClient(S_URL, S_KEY);
 
     let currentCat = "";
@@ -87,90 +102,93 @@
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('page-' + id).classList.add('active');
         if(document.getElementById('t-' + id)) document.getElementById('t-' + id).classList.add('active');
-        if(id === 'admin') loadAdmin();
+        
+        if(id === 'admin') { loadKitchenData(); }
     }
 
+    // --- BESTELLUNG ---
     async function startOrder(cat) {
-        currentCat = cat;
-        chosen = [];
-        document.getElementById('select-title').innerText = "Auswahl: " + cat;
+        currentCat = cat; chosen = [];
+        document.getElementById('select-title').innerText = cat;
         showPage('select');
         const { data } = await db.from('inventory').select('*').order('name');
         document.getElementById('item-grid').innerHTML = data.map(i => `
             <div class="item" id="i-${i.id}" onclick="toggle('${i.name}', ${i.id})">
                 <div style="font-size:1.5rem">${i.emoji || '📦'}</div>
                 <div style="font-size:0.75rem; font-weight:bold">${i.name}</div>
-                <span class="qty-info">${i.qty || ''}</span>
+                <div style="font-size:0.6rem; color:gray">${i.qty || ''}</div>
             </div>
         `).join('') || "Lager ist leer.";
     }
 
     function toggle(name, id) {
         const el = document.getElementById('i-' + id);
-        if(chosen.includes(name)) {
-            chosen = chosen.filter(n => n !== name);
-            el.classList.remove('selected');
-        } else {
-            chosen.push(name);
-            el.classList.add('selected');
-        }
+        if(chosen.includes(name)) { chosen = chosen.filter(n => n !== name); el.classList.remove('selected'); }
+        else { chosen.push(name); el.classList.add('selected'); }
     }
 
     async function sendFinalOrder() {
-        if(chosen.length === 0 && currentCat === 'Brotzeit') return alert("Wähle bitte etwas aus!");
         const extra = document.getElementById('extra-wish').value;
-        
-        // Wir passen die Daten an DEINE Tabellenstruktur an (note statt text)
-        const bestellText = `${currentCat}: ${chosen.join(', ')} ${extra ? ' | Extra: '+extra : ''}`;
-        
-        const { error } = await db.from('orders').insert([{ 
-            note: bestellText, 
-            status: 'pending' 
-        }]);
-
-        if(!error) {
-            alert("Erfolg! Bestellung abgeschickt.");
-            document.getElementById('extra-wish').value = "";
-            showPage('order');
-        } else { 
-            console.error(error);
-            alert("Fehler: " + error.message); 
-        }
+        const text = `${currentCat}: ${chosen.join(', ')} ${extra ? ' | '+extra : ''}`;
+        const { error } = await db.from('orders').insert([{ note: text, status: 'pending' }]);
+        if(!error) { alert("Bestellung abgeschickt!"); document.getElementById('extra-wish').value = ""; showPage('order'); }
     }
 
-    async function loadAdmin() {
-        const { data } = await db.from('inventory').select('*').order('name');
-        document.getElementById('admin-list').innerHTML = data.map(i => `
-            <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:10px">
-                <span>${i.emoji} <b>${i.name}</b> <br><small>${i.qty || '0'}</small></span>
-                <button onclick="del(${i.id})" style="color:red; border:none; background:none; font-size:1.2rem">✕</button>
+    async function sendDirectWish() {
+        const wishText = document.getElementById('direct-wish').value;
+        if(!wishText) return;
+        const { error } = await db.from('wishes').insert([{ text: wishText }]);
+        if(!error) { alert("Wunsch gesendet!"); document.getElementById('direct-wish').value = ""; }
+    }
+
+    // --- KÜCHE ---
+    async function loadKitchenData() {
+        // 1. Bestellungen (note Spalte)
+        const { data: orders } = await db.from('orders').select('*').order('created_at', { ascending: false });
+        document.getElementById('kitchen-orders').innerHTML = orders.map(o => `
+            <div class="order-card">
+                <div>
+                    <span class="order-time">${new Date(o.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} Uhr</span>
+                    <b>${o.note || 'Bestellung'}</b>
+                </div>
+                <button onclick="deleteRow('orders', ${o.id})" style="border:none; background:none; font-size:1.5rem">✅</button>
+            </div>
+        `).join('') || "<small>Keine Bestellungen.</small>";
+
+        // 2. Wünsche (text Spalte)
+        const { data: wishes } = await db.from('wishes').select('*').order('id', { ascending: false });
+        document.getElementById('kitchen-wishes').innerHTML = wishes.map(w => `
+            <div class="order-card" style="border-left-color: #555;">
+                <div><b>${w.text}</b></div>
+                <button onclick="deleteRow('wishes', ${w.id})" style="border:none; background:none; font-size:1.5rem">🗑️</button>
+            </div>
+        `).join('') || "<small>Keine Wünsche.</small>";
+
+        // 3. Inventar
+        const { data: inv } = await db.from('inventory').select('*').order('name');
+        document.getElementById('admin-inventory-list').innerHTML = inv.map(i => `
+            <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:10px;">
+                <span>${i.emoji} <b>${i.name}</b> (${i.qty})</span>
+                <button onclick="deleteRow('inventory', ${i.id})" style="color:red; border:none; background:none;">✕</button>
             </div>
         `).join('');
     }
 
+    async function deleteRow(table, id) {
+        await db.from(table).delete().eq('id', id);
+        loadKitchenData();
+    }
+
     async function saveToDb() {
         const name = document.getElementById('add-name').value;
-        const emoji = document.getElementById('add-emoji').value || '🍴';
-        const num = document.getElementById('add-qty-num').value || '1';
-        const unit = document.getElementById('add-qty-unit').value;
-        const fullQty = num + " " + unit;
-
-        if(!name) return alert("Name fehlt!");
-
-        const { error } = await db.from('inventory').insert([{ name, emoji, qty: fullQty }]);
-        if(error) alert("Fehler beim Speichern: " + error.message);
-        
+        const qty = document.getElementById('add-qty-num').value + " " + document.getElementById('add-qty-unit').value;
+        await db.from('inventory').insert([{ name, emoji: document.getElementById('add-emoji').value, qty }]);
         document.getElementById('add-name').value = "";
-        document.getElementById('add-qty-num').value = "";
-        loadAdmin();
+        loadKitchenData();
     }
 
-    async function del(id) { 
-        if(confirm("Löschen?")) {
-            await db.from('inventory').delete().eq('id', id); 
-            loadAdmin(); 
-        }
-    }
+    // Auto-Update
+    setInterval(() => { if(document.getElementById('page-admin').classList.contains('active')) loadKitchenData(); }, 20000);
 </script>
 </body>
 </html>
