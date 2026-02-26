@@ -12,44 +12,178 @@
 
 <style>
 :root{
---bg:#f8f9fa;--card:#fff;--text:#2d3436;
---accent:#e8703a;--soft:#fff3ed;--gray:#b2bec3;--warn:#d63031
+  --bg:#f8f9fa;
+  --card:#ffffff;
+  --text:#2d3436;
+  --accent:#e8703a;
+  --soft:#fff3ed;
+  --warn:#d63031;
 }
+
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
 body{background:var(--bg);color:var(--text)}
 
-nav{background:#fff;padding:15px 20px;display:flex;justify-content:space-between;
-box-shadow:0 2px 10px rgba(0,0,0,.05)}
+nav{
+  background:#fff;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 2px 10px rgba(0,0,0,.05)
+}
+
 .logo{font-weight:900;color:var(--accent)}
-.nav-tabs{display:flex;background:#eee;padding:4px;border-radius:12px}
-.nav-tab{border:none;background:none;padding:8px 16px;font-weight:700;color:#666;border-radius:8px}
-.nav-tab.active{background:#fff;color:var(--accent)}
 
-.page{display:none;max-width:520px;margin:auto;padding:20px}
+.nav-tabs{
+  display:flex;
+  background:#eee;
+  padding:4px;
+  border-radius:12px
+}
+
+.nav-tab{
+  border:none;
+  background:none;
+  padding:8px 16px;
+  font-weight:700;
+  color:#666;
+  border-radius:8px;
+  cursor:pointer
+}
+
+.nav-tab.active{
+  background:#fff;
+  color:var(--accent)
+}
+
+.page{
+  display:none;
+  max-width:520px;
+  margin:auto;
+  padding:20px
+}
+
 .page.active{display:block}
-.card{background:#fff;border-radius:24px;padding:20px;margin-bottom:20px}
 
-.cat-btn{width:100%;border:none;border-radius:18px;padding:18px;margin-bottom:12px;
-color:#fff;font-size:1.1rem;font-weight:800}
+.card{
+  background:var(--card);
+  border-radius:24px;
+  padding:20px;
+  margin-bottom:20px
+}
 
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.item{background:#f1f2f3;border-radius:18px;padding:10px;text-align:center}
-.item.selected{background:var(--soft);border:2px solid var(--accent)}
+.cat-btn{
+  width:100%;
+  border:none;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:12px;
+  color:white;
+  font-size:1.1rem;
+  font-weight:800;
+  cursor:pointer
+}
 
-.qty{display:flex;justify-content:center;gap:6px;margin-top:6px}
-.qty button{border:none;background:var(--accent);color:#fff;width:26px;height:26px;border-radius:8px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px
+}
 
-textarea{width:100%;border-radius:14px;padding:10px;border:1px solid #ddd}
-.btn-main{width:100%;border:none;background:var(--accent);color:#fff;padding:16px;border-radius:18px;font-weight:900}
+.item{
+  background:#f1f2f3;
+  border-radius:18px;
+  padding:10px;
+  text-align:center
+}
 
-.kitchen-card{background:#fff;border-radius:18px;padding:14px;display:flex;
-justify-content:space-between;align-items:center;border-left:6px solid var(--accent);margin-bottom:10px}
+.item.selected{
+  background:var(--soft);
+  border:2px solid var(--accent)
+}
 
-.done-btn{border:none;background:#00b894;color:#fff;width:44px;height:44px;border-radius:14px;font-size:1.2rem}
+.qty{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin-top:6px
+}
 
-.inventory-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;font-size:.85rem}
-.inventory-row input,.inventory-row select{padding:5px;border-radius:6px;border:1px solid #ccc}
-.inventory-row button{border:none;background:var(--accent);color:#fff;padding:6px;border-radius:8px}
+.qty button{
+  border:none;
+  background:var(--accent);
+  color:white;
+  width:26px;
+  height:26px;
+  border-radius:8px;
+  cursor:pointer
+}
+
+textarea{
+  width:100%;
+  border-radius:14px;
+  padding:10px;
+  border:1px solid #ddd;
+  margin-top:10px
+}
+
+.btn-main{
+  width:100%;
+  border:none;
+  background:var(--accent);
+  color:white;
+  padding:16px;
+  border-radius:18px;
+  font-weight:900;
+  cursor:pointer
+}
+
+.kitchen-card{
+  background:#fff;
+  border-radius:18px;
+  padding:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-left:6px solid var(--accent);
+  margin-bottom:10px
+}
+
+.done-btn{
+  border:none;
+  background:#00b894;
+  color:white;
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  font-size:1.2rem;
+  cursor:pointer
+}
+
+.inventory-row{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  margin-bottom:6px;
+  font-size:.85rem
+}
+
+.inventory-row input,
+.inventory-row select{
+  padding:5px;
+  border-radius:6px;
+  border:1px solid #ccc
+}
+
+.inventory-row button{
+  border:none;
+  background:var(--accent);
+  color:white;
+  padding:6px;
+  border-radius:8px;
+  cursor:pointer
+}
+
 .low{color:var(--warn);font-weight:800}
 </style>
 </head>
@@ -57,139 +191,153 @@ justify-content:space-between;align-items:center;border-left:6px solid var(--acc
 <body>
 
 <nav>
-<div class="logo">KALLIES</div>
-<div class="nav-tabs">
-<button class="nav-tab active" id="t-order" onclick="showPage('order')">Wunsch</button>
-<button class="nav-tab" id="t-admin" onclick="showPage('admin')">Küche</button>
-</div>
+  <div class="logo">KALLIES</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="t-order" onclick="showPage('order')">Wunsch</button>
+    <button class="nav-tab" id="t-admin" onclick="showPage('admin')">Küche</button>
+  </div>
 </nav>
 
 <div id="page-order" class="page active">
-<div class="card">
-<button class="cat-btn" style="background:#8b5e3c" onclick="startOrder('Brotzeit')">🍞 Brotzeit</button>
-<button class="cat-btn" style="background:#5e8b3c" onclick="startOrder('Mittagessen')">🍲 Mittagessen</button>
-<button class="cat-btn" style="background:#3c5e8b" onclick="startOrder('Abendessen')">🥗 Abendessen</button>
-<button class="cat-btn" style="background:#e67e22" onclick="startOrder('Snacks')">🍎 Snacks</button>
-</div>
+  <div class="card">
+    <button class="cat-btn" style="background:#8b5e3c" onclick="startOrder('Brotzeit')">🍞 Brotzeit</button>
+    <button class="cat-btn" style="background:#5e8b3c" onclick="startOrder('Mittagessen')">🍲 Mittagessen</button>
+    <button class="cat-btn" style="background:#3c5e8b" onclick="startOrder('Abendessen')">🥗 Abendessen</button>
+    <button class="cat-btn" style="background:#e67e22" onclick="startOrder('Snacks')">🍎 Snacks</button>
+  </div>
 </div>
 
 <div id="page-select" class="page">
-<div class="card">
-<h2 id="select-title"></h2>
-<div id="item-grid" class="grid"></div>
-<textarea id="extra-wish" placeholder="Besondere Wünsche?"></textarea>
-<button class="btn-main" onclick="sendOrder()">Bestellung senden</button>
-</div>
+  <div class="card">
+    <h2 id="select-title"></h2>
+    <div id="item-grid" class="grid"></div>
+    <textarea id="extra-wish" placeholder="Besondere Wünsche?"></textarea>
+    <button class="btn-main" onclick="sendOrder()">Bestellung senden</button>
+  </div>
 </div>
 
 <div id="page-admin" class="page">
-<h2>🛎️ Küche</h2>
-<div id="kitchen-orders"></div>
+  <h2>🛎️ Küche</h2>
+  <div id="kitchen-orders"></div>
 
-<div class="card">
-<h3>🧊 Kühlschrank</h3>
-<div id="inventory-list"></div>
-<button class="btn-main" onclick="addItem()">➕ Artikel hinzufügen</button>
-</div>
+  <div class="card">
+    <h3>🧊 Kühlschrank</h3>
+    <div id="inventory-list"></div>
+    <button class="btn-main" onclick="addItem()">➕ Artikel hinzufügen</button>
+  </div>
 </div>
 
 <script>
 const db = supabase.createClient(
-"https://tdlswqmltbzvjdavnuyz.supabase.co",
-"sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HAeo3"
+  "https://tdlswqmltbzvjdavnuyz.supabase.co",
+  "sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HAeo3"
 );
 
-let category="",cart={},inventory=[];
+let category = "";
+let cart = {};
+let inventory = [];
 
+/* ---------- NAV ---------- */
 function showPage(p){
-document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
-document.querySelectorAll(".nav-tab").forEach(x=>x.classList.remove("active"));
-document.getElementById("page-"+p).classList.add("active");
-document.getElementById("t-"+p).classList.add("active");
-if(p==="admin"){loadKitchen();loadInventory();}
+  document.querySelectorAll(".page").forEach(e=>e.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(e=>e.classList.remove("active"));
+  document.getElementById("page-"+p).classList.add("active");
+  document.getElementById("t-"+p).classList.add("active");
+  if(p==="admin"){loadKitchen();loadInventory();}
 }
 
+/* ---------- ORDER ---------- */
 async function startOrder(cat){
-category=cat;cart={};
-showPage("select");
-select-title.innerText=cat;
-const {data}=await db.from("inventory").select("*").order("name");
-inventory=data||[];
-item-grid.innerHTML=inventory.map(i=>`
-<div class="item" id="i${i.id}">
-${i.emoji||"📦"}<br><b>${i.name}</b><br>
-<small class="${i.amount<2?'low':''}">${i.amount} ${i.unit}</small>
-<div class="qty">
-<button onclick="chg(${i.id},'${i.name}',-1)">–</button>
-<button onclick="chg(${i.id},'${i.name}',1)">+</button>
-</div>
-</div>`).join("");
+  category = cat;
+  cart = {};
+  showPage("select");
+  document.getElementById("select-title").innerText = cat;
+
+  const {data} = await db.from("inventory").select("*").order("name");
+  inventory = data || [];
+
+  document.getElementById("item-grid").innerHTML = inventory.map(i=>`
+    <div class="item" id="i${i.id}">
+      ${i.emoji || "📦"}<br><b>${i.name}</b><br>
+      <small class="${i.amount < 2 ? 'low' : ''}">${i.amount} ${i.unit}</small>
+      <div class="qty">
+        <button onclick="changeQty(${i.id},'${i.name}',-1)">–</button>
+        <button onclick="changeQty(${i.id},'${i.name}',1)">+</button>
+      </div>
+    </div>
+  `).join("");
 }
 
-function chg(id,name,d){
-cart[name]=(cart[name]||0)+d;
-if(cart[name]<=0)delete cart[name];
-document.getElementById("i"+id).classList.toggle("selected",cart[name]>0);
+function changeQty(id,name,delta){
+  cart[name] = (cart[name] || 0) + delta;
+  if(cart[name] <= 0) delete cart[name];
+  document.getElementById("i"+id).classList.toggle("selected", cart[name] > 0);
 }
 
 async function sendOrder(){
-if(!Object.keys(cart).length)return;
-await db.from("orders").insert([{note:category,items:cart,status:"pending"}]);
+  if(Object.keys(cart).length === 0) return;
 
-for(const [name,qty] of Object.entries(cart)){
-await db.rpc("decrement_inventory",{item_name:name,qty});
-}
-alert("Abgeschickt ✨");
-showPage("order");
+  await db.from("orders").insert([{items:cart,status:"pending"}]);
+
+  for(const [name,qty] of Object.entries(cart)){
+    await db.rpc("decrement_inventory",{item_name:name,qty});
+  }
+
+  alert("Abgeschickt ✨");
+  showPage("order");
 }
 
+/* ---------- KITCHEN ---------- */
 async function loadKitchen(){
-const {data}=await db.from("orders").select("*").eq("status","pending");
-kitchen-orders.innerHTML=data.map(o=>`
-<div class="kitchen-card">
-<div>${o.note}<br>${Object.entries(o.items).map(([k,v])=>`${v}× ${k}`).join(", ")}</div>
-<button class="done-btn" onclick="done(${o.id})">✓</button>
-</div>`).join("");
+  const {data} = await db.from("orders").select("*").eq("status","pending");
+  document.getElementById("kitchen-orders").innerHTML = data.map(o=>`
+    <div class="kitchen-card">
+      <div>${Object.entries(o.items).map(([k,v])=>`${v}× ${k}`).join(", ")}</div>
+      <button class="done-btn" onclick="done(${o.id})">✓</button>
+    </div>
+  `).join("");
 }
 
 async function done(id){
-await db.from("orders").update({status:"done"}).eq("id",id);
-loadKitchen();
+  await db.from("orders").update({status:"done"}).eq("id",id);
+  loadKitchen();
 }
 
+/* ---------- INVENTORY ---------- */
 async function loadInventory(){
-const {data}=await db.from("inventory").select("*").order("name");
-inventory-list.innerHTML=data.map(i=>`
-<div class="inventory-row">
-<input value="${i.emoji||""}" id="e${i.id}" style="width:30px">
-<input value="${i.name}" id="n${i.id}">
-<input type="number" step="0.1" value="${i.amount}" id="a${i.id}">
-<select id="u${i.id}">
-${["Stk","g","kg","ml","l","Scheiben","Packungen"].map(u=>`
-<option ${i.unit===u?"selected":""}>${u}</option>`).join("")}
-</select>
-<button onclick="saveItem(${i.id})">💾</button>
-<button onclick="delItem(${i.id})">🗑️</button>
-</div>`).join("");
+  const {data} = await db.from("inventory").select("*").order("name");
+  document.getElementById("inventory-list").innerHTML = data.map(i=>`
+    <div class="inventory-row">
+      <input id="e${i.id}" value="${i.emoji || ''}" style="width:30px">
+      <input id="n${i.id}" value="${i.name}">
+      <input id="a${i.id}" type="number" step="0.1" value="${i.amount}">
+      <select id="u${i.id}">
+        ${["Stk","Scheiben","g","kg","ml","l","Packungen"].map(u=>`
+          <option ${i.unit===u?"selected":""}>${u}</option>`).join("")}
+      </select>
+      <button onclick="saveItem(${i.id})">💾</button>
+      <button onclick="deleteItem(${i.id})">🗑️</button>
+    </div>
+  `).join("");
 }
 
 async function saveItem(id){
-await db.from("inventory").update({
-emoji:e${id}.value,
-name:n${id}.value,
-amount:a${id}.value,
-unit:u${id}.value
-}).eq("id",id);
+  const emoji  = document.getElementById("e"+id).value;
+  const name   = document.getElementById("n"+id).value;
+  const amount = document.getElementById("a"+id).value;
+  const unit   = document.getElementById("u"+id).value;
+
+  await db.from("inventory").update({emoji,name,amount,unit}).eq("id",id);
 }
 
-async function delItem(id){
-await db.from("inventory").delete().eq("id",id);
-loadInventory();
+async function deleteItem(id){
+  await db.from("inventory").delete().eq("id",id);
+  loadInventory();
 }
 
 async function addItem(){
-await db.from("inventory").insert([{name:"Neu",amount:0,unit:"Stk"}]);
-loadInventory();
+  await db.from("inventory").insert([{name:"Neu",amount:0,unit:"Stk"}]);
+  loadInventory();
 }
 </script>
 
