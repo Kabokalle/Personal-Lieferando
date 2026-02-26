@@ -3,167 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍳 Für Dich – Bestellapp</title>
+    <title>Kallies Küche</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --cream: #fdf6ec; --warm: #f5e6cc; --orange: #e8703a;
-            --brown: #3d2b1f; --card: #fff9f2; --shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
-        body { background: var(--cream); color: var(--brown); padding-bottom: 40px; }
-        
-        /* Nav */
-        nav { background: var(--brown); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .logo { color: white; font-family: 'Playfair Display', serif; font-weight: 700; }
+        :root { --bg: #fdf6ec; --text: #3d2b1f; --accent: #e8703a; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        nav { background: var(--text); color: white; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: bold; font-size: 1.2rem; }
         .nav-tabs { display: flex; gap: 8px; }
-        .nav-tab { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
-        .nav-tab.active { background: var(--orange); }
-
-        /* Content */
-        .page { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
+        .nav-tab { background: #555; border: none; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+        .nav-tab.active { background: var(--accent); }
+        .page { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
         .page.active { display: block; }
-        .card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; }
-        
-        /* Grid */
-        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .inv-item { background: var(--warm); border-radius: 12px; padding: 10px; text-align: center; border: 2px solid transparent; }
-        .inv-item.selected { border-color: var(--orange); background: white; }
-        .emoji { font-size: 1.5rem; display: block; }
-        .name { font-size: 0.8rem; font-weight: 700; }
-
-        /* Buttons & Inputs */
-        input { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #ddd; }
-        .btn { background: var(--orange); color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: 700; cursor: pointer; margin-top: 10px; }
-        .btn-add { background: var(--brown); margin-top: 5px; }
-        .list-item { background: white; padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        #debug-log { background: #222; color: #0f0; padding: 10px; font-family: monospace; font-size: 11px; height: 80px; overflow-y: auto; position: fixed; bottom: 0; width: 100%; border-top: 2px solid #444; }
     </style>
 </head>
 <body>
 
 <nav>
-    <div class="logo">🍳 FürDich</div>
+    <div class="logo">🍳 Kallies Küche</div>
     <div class="nav-tabs">
-        <button id="tab-order" class="nav-tab active" onclick="showPage('order')">💝 Bestellen</button>
-        <button id="tab-admin" class="nav-tab" onclick="showPage('admin')">👨‍🍳 Küche</button>
+        <button id="btn-order" class="nav-tab active" onclick="showPage('order')">Bestellen</button>
+        <button id="btn-admin" class="nav-tab" onclick="showPage('admin')">Küche</button>
     </div>
 </nav>
 
 <div id="page-order" class="page active">
     <div class="card">
         <h2>🧊 Kühlschrank</h2>
-        <div id="inv-grid" class="inventory-grid">Lade...</div>
+        <div id="user-grid">Lade Inventar...</div>
     </div>
 </div>
 
 <div id="page-admin" class="page">
     <div class="card">
-        <h2>📦 Inventar verwalten</h2>
-        <div id="admin-inv"></div>
-        <div style="margin-top:15px; background: #eee; padding: 10px; border-radius: 10px;">
-            <input type="text" id="new-emoji" placeholder="Emoji (z.B. 🥚)">
-            <input type="text" id="new-name" placeholder="Name (z.B. Eier)">
-            <input type="text" id="new-qty" placeholder="Menge (z.B. 6 Stk)">
-            <button class="btn btn-add" onclick="addInv()">Hinzufügen</button>
-        </div>
+        <h2>➕ Neuen Artikel hinzufügen</h2>
+        <input type="text" id="in-name" placeholder="Name (z.B. Eier)" style="width:70%; padding:10px;">
+        <button onclick="saveToDb()" style="padding:10px; background:green; color:white; border:none; border-radius:5px; cursor:pointer;">Speichern</button>
+    </div>
+    <div class="card">
+        <h2>📦 Lagerbestand</h2>
+        <div id="admin-list"></div>
     </div>
 </div>
 
+<div id="debug-log">Initialisiere...<br></div>
+
 <script>
-    // 1. DEINE DATEN HIER EINTRAGEN
-    const SB_URL = "DEINE_SUPABASE_URL";
-    const SB_KEY = "DEIN_SUPABASE_ANON_KEY";
+    // 1. DEINE DATEN (REINIGUNG: Variable heißt jetzt 'db' statt 'supabase')
+    const S_URL = "https://tdlswqmltbzvjdavnuyz.supabase.co";
+    const S_KEY = "sb_publishable_emlxBa5GwRegGymo7_M0uQ_i91HA7G8Lia3RzY66q16uN3j4z7s7p6v5r4";
 
-    // 2. INITIALISIERUNG (Mit Fehlerprüfung)
-    let supabase;
-    try {
-        supabase = window.supabase.createClient(SB_URL, SB_KEY);
-    } catch (e) {
-        alert("Supabase konnte nicht geladen werden. Prüfe URL und Key!");
-    }
+    const logger = document.getElementById('debug-log');
+    function log(m) { logger.innerHTML += "> " + m + "<br>"; logger.scrollTop = logger.scrollHeight; }
 
-    let inventory = [];
-
-    // 3. SEITENWECHSEL (Jetzt unabhängig von der DB)
+    // TABS UMSCHALTEN (Funktion muss 'showPage' heißen, wie im HTML)
     function showPage(pageId) {
-        // Alle Seiten verstecken
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        
-        // Gewünschte Seite zeigen
+        log("Wechsle zu: " + pageId);
+        // Seiten
+        document.getElementById('page-order').classList.remove('active');
+        document.getElementById('page-admin').classList.remove('active');
         document.getElementById('page-' + pageId).classList.add('active');
-        document.getElementById('tab-' + pageId).classList.add('active');
+        // Buttons
+        document.getElementById('btn-order').classList.remove('active');
+        document.getElementById('btn-admin').classList.remove('active');
+        document.getElementById('btn-' + pageId).classList.add('active');
         
-        loadData(); // Daten im Hintergrund nachladen
+        loadFromDb();
     }
 
-    // 4. DATEN LADEN
-    async function loadData() {
+    // DATENBANK VERBINDUNG
+    let db;
+    try {
+        // Wir nutzen den globalen 'supabase' Namen der Library NUR zum Erstellen
+        db = window.supabase.createClient(S_URL, S_KEY);
+        log("Verbindung zur Datenbank steht.");
+    } catch(e) {
+        log("FEHLER: " + e.message);
+    }
+
+    async function loadFromDb() {
+        log("Lade Daten...");
         try {
-            const { data, error } = await supabase.from('inventory').select('*').order('name');
-            if (error) throw error;
-            inventory = data || [];
-            render();
-        } catch (err) {
-            console.error("Fehler beim Laden:", err.message);
+            const { data, error } = await db.from('inventory').select('*');
+            if(error) throw error;
+            
+            log(data.length + " Artikel gefunden.");
+            
+            // Anzeige User
+            document.getElementById('user-grid').innerHTML = data.map(i => `
+                <div style="padding:10px; background:#f5e6cc; margin:5px; border-radius:8px; display:inline-block;">
+                    <b>${i.name}</b>
+                </div>
+            `).join('') || "Kühlschrank leer.";
+
+            // Anzeige Admin
+            document.getElementById('admin-list').innerHTML = data.map(i => `
+                <div style="border-bottom:1px solid #eee; padding:10px; display:flex; justify-content:space-between;">
+                    <span>${i.name}</span>
+                    <button onclick="deleteFromDb(${i.id})" style="color:red; border:none; background:none; cursor:pointer;">Löschen</button>
+                </div>
+            `).join('');
+
+        } catch(e) {
+            log("DB-Ladefehler: " + e.message);
         }
     }
 
-    // 5. INVENTAR HINZUFÜGEN
-    async function addInv() {
-        const emoji = document.getElementById('new-emoji').value;
-        const name = document.getElementById('new-name').value;
-        const qty = document.getElementById('new-qty').value;
-
-        if(!name) return alert("Bitte mindestens einen Namen eingeben!");
-
-        try {
-            const { error } = await supabase.from('inventory').insert([{ emoji, name, qty }]);
-            if (error) throw error;
-            
-            // Felder leeren
-            document.getElementById('new-emoji').value = "";
-            document.getElementById('new-name').value = "";
-            document.getElementById('new-qty').value = "";
-            
-            loadData(); // Liste aktualisieren
-        } catch (err) {
-            alert("Fehler beim Speichern: " + err.message);
-        }
+    async function saveToDb() {
+        const val = document.getElementById('in-name').value;
+        if(!val) return;
+        log("Speichere: " + val);
+        const { error } = await db.from('inventory').insert([{ name: val }]);
+        if(error) log("Speicherfehler: " + error.message);
+        document.getElementById('in-name').value = "";
+        loadFromDb();
     }
 
-    // 6. LÖSCHEN
-    async function removeInv(id) {
-        await supabase.from('inventory').delete().eq('id', id);
-        loadData();
+    async function deleteFromDb(id) {
+        await db.from('inventory').delete().eq('id', id);
+        loadFromDb();
     }
-
-    // 7. ANZEIGEN
-    function render() {
-        // Besteller-Ansicht
-        document.getElementById('inv-grid').innerHTML = inventory.map(i => `
-            <div class="inv-item">
-                <span class="emoji">${i.emoji || '📦'}</span>
-                <div class="name">${i.name}</div>
-                <div style="font-size:0.6rem">${i.qty || ''}</div>
-            </div>
-        `).join('') || "Leer";
-
-        // Admin-Ansicht
-        document.getElementById('admin-inv').innerHTML = inventory.map(i => `
-            <div class="list-item">
-                <span>${i.emoji} ${i.name}</span>
-                <button onclick="removeInv(${i.id})" style="border:none; background:none; cursor:pointer">❌</button>
-            </div>
-        `).join('');
-    }
-
-    // Echtzeit-Updates einschalten
-    supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, loadData).subscribe();
 
     // Start
-    loadData();
+    loadFromDb();
 </script>
 </body>
 </html>
